@@ -11,6 +11,8 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+
+	"tt/asset"
 )
 
 const timeTemplate1 = "2006-01-02 15:04:05"
@@ -19,11 +21,14 @@ func main() {
 	myApp := app.New()
 	setting := myApp.Settings()
 	setting.SetTheme(theme.LightTheme())
-	resource, err := fyne.LoadResourceFromPath("img/time_icon.jpg")
+	//命令 go-bindata -o=./asset/asset.go -pkg=asset img/
+	//静态文件解析，解决静态文件在1.16前无法打入包中问题
+	data, err := asset.Asset("img/time_icon.jpg")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+	resource := fyne.NewStaticResource("time_icon", data)
 	myApp.SetIcon(resource)
 	myWindow := myApp.NewWindow("Time")
 

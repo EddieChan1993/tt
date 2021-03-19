@@ -62,6 +62,8 @@ github.com/godbus/dbus/v5
 github.com/goki/freetype
 github.com/goki/freetype/raster
 github.com/goki/freetype/truetype
+# github.com/jteeuwen/go-bindata v3.0.7+incompatible
+## explicit
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
 # github.com/srwiley/oksvg v0.0.0-20200311192757-870daf9aa564
