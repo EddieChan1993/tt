@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
 	"strconv"
 	"time"
@@ -11,24 +12,18 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-
-	"tt/asset"
 )
 
 const timeTemplate1 = "2006-01-02 15:04:05"
+
+//go:embed img/time_icon.jpg
+var icon []byte
 
 func main() {
 	myApp := app.New()
 	setting := myApp.Settings()
 	setting.SetTheme(theme.LightTheme())
-	//命令 go-bindata -o=./asset/asset.go -pkg=asset img/
-	//静态文件解析，解决静态文件在1.16前无法打入包中问题
-	data, err := asset.Asset("img/time_icon.jpg")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	resource := fyne.NewStaticResource("time_icon", data)
+	resource := fyne.NewStaticResource("time_icon", icon)
 	myApp.SetIcon(resource)
 	myWindow := myApp.NewWindow("Time")
 
@@ -53,11 +48,15 @@ func TimestampToDate() []fyne.CanvasObject {
 			fmt.Println(err)
 			return
 		}
-		date := time.Unix(int64(nums/1000), 0).Format(timeTemplate1)
+		date, err := timeStampToDate(nums)
+		if err != nil {
+			return
+		}
 		text3.SetText(date)
 		//复制到剪切版
 		clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
 		clipboard.SetContent(date)
+		fmt.Printf("%d--->%s\n", nums, date)
 	})
 	return []fyne.CanvasObject{
 		timeStampInp, click1, text3,
@@ -66,6 +65,9 @@ func TimestampToDate() []fyne.CanvasObject {
 
 func DateToTimestamp() []fyne.CanvasObject {
 	timeStampInp := widget.NewEntry()
+	now := time.Now().UnixNano() / 1e6
+	date, _ := timeStampToDate(int(now))
+	timeStampInp.SetText(date)
 	timeStampInp.SetPlaceHolder("date")
 	text3 := widget.NewLabel("time stamp")
 	click1 := widget.NewButton("click", func() {
@@ -78,8 +80,18 @@ func DateToTimestamp() []fyne.CanvasObject {
 		text3.SetText(millionSec)
 		clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
 		clipboard.SetContent(millionSec)
+		fmt.Printf("%s--->%s\n", stamp, millionSec)
 	})
 	return []fyne.CanvasObject{
 		timeStampInp, click1, text3,
 	}
+}
+
+func timeStampToDate(t int) (date string, err error) {
+	nums, err := strconv.Atoi(strconv.Itoa(t))
+	if err != nil {
+		return
+	}
+	date = time.Unix(int64(nums/1000), 0).Format(timeTemplate1)
+	return
 }
