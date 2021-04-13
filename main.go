@@ -27,13 +27,13 @@ func main() {
 	myApp.SetIcon(resource)
 	myWindow := myApp.NewWindow("Time")
 
-	gridElems := TimestampToDate()
-	gridElems2 := DateToTimestamp()
 	timerGridElems3, ticker := TimeNow()
 	defer ticker.Stop()
-	gridElems = append(gridElems, gridElems2...)
-	gridElems = append(gridElems, timerGridElems3...)
-	grid := container.New(layout.NewGridLayout(3), gridElems...)
+	gridElems := TimestampToDate()
+	gridElems2 := DateToTimestamp()
+	timerGridElems3 = append(timerGridElems3, gridElems...)
+	timerGridElems3 = append(timerGridElems3, gridElems2...)
+	grid := container.New(layout.NewGridLayout(3), timerGridElems3...)
 	myWindow.SetContent(grid)
 	myWindow.Resize(fyne.NewSize(500, 50))
 	myWindow.ShowAndRun()
@@ -44,20 +44,42 @@ func TimeNow() ([]fyne.CanvasObject, *time.Ticker) {
 	millionSec := strconv.Itoa(int(now))
 	timeStampInp := widget.NewLabel(millionSec)
 	timeStampInp.SetText(strconv.Itoa(int(now)))
-	click1 := widget.NewButton("COPY", func() {
-		//复制到剪切版
-		copyClipBoard(timeStampInp.Text)
-	})
-	click1.SetIcon(theme.ContentCopyIcon())
+	text3 := widget.NewLabel("DATE")
+	nums, err := strconv.Atoi(timeStampInp.Text)
+	if err != nil {
+		fmt.Println(err)
+		return nil, nil
+	}
+	date, err := timeStampToDate(nums)
+	if err != nil {
+		fmt.Println(err)
+		return nil, nil
+	}
+	text3.SetText(date)
 	ticker := time.NewTicker(time.Second)
-	go func(label *widget.Label) {
+	go func(label,text3 *widget.Label) {
 		for t := range ticker.C {
 			millionSec := strconv.Itoa(int(t.UnixNano() / 1e6))
 			label.SetText(millionSec)
+			nums, err := strconv.Atoi(timeStampInp.Text)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			date, err := timeStampToDate(nums)
+			if err != nil {
+				return
+			}
+			text3.SetText(date)
 		}
-	}(timeStampInp)
+	}(timeStampInp,text3)
+	click1 := widget.NewButton("COPY", func() {
+		//复制到剪切版
+		copyClipBoard(text3.Text)
+	})
+	click1.SetIcon(theme.ContentCopyIcon())
 	return []fyne.CanvasObject{
-		timeStampInp, click1,
+		timeStampInp, click1,text3,
 	}, ticker
 }
 
