@@ -48,6 +48,7 @@ func TimeNow() ([]fyne.CanvasObject, *time.Ticker) {
 		//复制到剪切版
 		copyClipBoard(timeStampInp.Text)
 	})
+	click1.SetIcon(theme.ContentCopyIcon())
 	ticker := time.NewTicker(time.Second)
 	go func(label *widget.Label) {
 		for t := range ticker.C {
