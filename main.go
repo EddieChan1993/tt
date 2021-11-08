@@ -92,7 +92,7 @@ func TimestampToDate() []fyne.CanvasObject {
 	timeStampInp := widget.NewEntry()
 	now := time.Now().UnixNano() / 1e6
 	timeStampInp.SetText(strconv.Itoa(int(now)))
-	timeStampInp.SetPlaceHolder("TIME STAMP")
+	timeStampInp.SetPlaceHolder("TIMESTAMP")
 	text3 := widget.NewLabel("DATE")
 	click1 := widget.NewButton("CLICK", func() {
 		nums, err := strconv.Atoi(timeStampInp.Text)
@@ -120,7 +120,7 @@ func DateToTimestamp() []fyne.CanvasObject {
 	date, _ := timeStampToDate(int(now))
 	timeStampInp.SetText(date)
 	timeStampInp.SetPlaceHolder("DATE")
-	text3 := widget.NewLabel("TIME STAMP")
+	text3 := widget.NewLabel("TIMESTAMP")
 
 	click1 := widget.NewButton("CLICK", func() {
 		stamp, err := time.ParseInLocation(timeTemplate1, timeStampInp.Text, time.Local)
@@ -166,6 +166,9 @@ func DayToSec() []fyne.CanvasObject {
 
 	click1 := widget.NewButton("CLICK", func() {
 		str := dayHMSToSec(timeStampInp.Text)
+		if str == "" {
+			return
+		}
 		text3.SetText(str)
 		copyClipBoard(str)
 		fmt.Printf("%s--->%s\n", timeStampInp.Text, str)
