@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -31,10 +32,12 @@ func main() {
 	defer ticker.Stop()
 	gridElems := TimestampToDate()
 	gridElems2 := DateToTimestamp()
-	gridElems3 := SecToDayHMS()
+	gridElems3 := DayToSec()
+	gridElems4 := SecToDayHMS()
 	timerGridElems3 = append(timerGridElems3, gridElems...)
 	timerGridElems3 = append(timerGridElems3, gridElems2...)
 	timerGridElems3 = append(timerGridElems3, gridElems3...)
+	timerGridElems3 = append(timerGridElems3, gridElems4...)
 	grid := container.New(layout.NewGridLayout(3), timerGridElems3...)
 	myWindow.SetContent(grid)
 	myWindow.Resize(fyne.NewSize(500, 50))
@@ -137,8 +140,8 @@ func DateToTimestamp() []fyne.CanvasObject {
 
 func SecToDayHMS() []fyne.CanvasObject {
 	timeStampInp := widget.NewEntry()
-	timeStampInp.SetPlaceHolder("SECOND")
-	text3 := widget.NewLabel("DAY HMS")
+	timeStampInp.SetPlaceHolder("SECONDS")
+	text3 := widget.NewLabel("D H M S")
 
 	click1 := widget.NewButton("CLICK", func() {
 		seconds, err := strconv.Atoi(timeStampInp.Text)
@@ -150,6 +153,22 @@ func SecToDayHMS() []fyne.CanvasObject {
 		text3.SetText(str)
 		copyClipBoard(str)
 		fmt.Printf("%d--->%s\n", seconds, str)
+	})
+	return []fyne.CanvasObject{
+		timeStampInp, click1, text3,
+	}
+}
+
+func DayToSec() []fyne.CanvasObject {
+	timeStampInp := widget.NewEntry()
+	timeStampInp.SetPlaceHolder("D H M S")
+	text3 := widget.NewLabel("SECONDS")
+
+	click1 := widget.NewButton("CLICK", func() {
+		str := dayHMSToSec(timeStampInp.Text)
+		text3.SetText(str)
+		copyClipBoard(str)
+		fmt.Printf("%s--->%s\n", timeStampInp.Text, str)
 	})
 	return []fyne.CanvasObject{
 		timeStampInp, click1, text3,
@@ -169,15 +188,27 @@ func timeStampToDate(t int) (date string, err error) {
 func secToDayHMS(seconds int) string {
 	var day, hour, minute, second int
 	day = seconds / (24 * 3600)
-	hour = (seconds - day * 3600 * 24) / 3600
-	minute = (seconds - day * 24 * 3600 - hour * 3600) / 60
-	second = seconds - day * 24 * 3600 - hour * 3600 - minute * 60
+	hour = (seconds - day*3600*24) / 3600
+	minute = (seconds - day*24*3600 - hour*3600) / 60
+	second = seconds - day*24*3600 - hour*3600 - minute*60
 	return strconv.Itoa(day) + "d " + strconv.Itoa(hour) + "h " + strconv.Itoa(minute) + "m " + strconv.Itoa(second) + "s"
 }
 
 //DayHMSToSec 天小时分钟秒钟转为秒
-func DayHMSToSec() {
+func dayHMSToSec(str string) string {
+	byStr := strings.Split(str, " ")
+	if len(byStr) != 4 {
+		return ""
+	}
+	day, _ := strconv.Atoi(byStr[0])
+	hour, _ := strconv.Atoi(byStr[1])
+	minute, _ := strconv.Atoi(byStr[2])
+	second, _ := strconv.Atoi(byStr[3])
 
+	if day < 0 || hour < 0 || minute < 0 || second < 0 {
+		return ""
+	}
+	return strconv.Itoa(day*3600*24 + hour*3600 + minute*60 + second)
 }
 
 func copyClipBoard(context string) {
