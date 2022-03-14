@@ -1,4 +1,4 @@
-module github.com/EddieChan1993
+module github.com/EddieChan1993/tt
 
 go 1.16
 
